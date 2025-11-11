@@ -21,6 +21,9 @@ const NUMERIC_COLUMNS = ['Number', 'LowerLimit', 'Value', 'UpperLimit'];
 export const DataTable = ({ headers, rows, totalRows }: DataTableProps) => {
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [sortConfigs, setSortConfigs] = useState<SortConfig[]>([]);
+  
+  console.log('DataTable received headers:', headers);
+  console.log('DataTable received rows (first row):', rows[0]);
 
   const filteredRows = useMemo(() => {
     return rows.filter(row => {
