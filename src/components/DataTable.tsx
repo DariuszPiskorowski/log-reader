@@ -186,14 +186,26 @@ export const DataTable = ({ headers, rows, totalRows }: DataTableProps) => {
                 key={index}
                 className="hover:bg-table-hover transition-colors border-b border-table-border last:border-b-0"
               >
-                {headers.map(header => (
-                  <td
-                    key={`${index}-${header}`}
-                    className="px-4 py-3 text-sm text-foreground whitespace-nowrap"
-                  >
-                    {row[header]}
-                  </td>
-                ))}
+                {headers.map(header => {
+                  const value = row[header];
+                  const isHex = value && value.length > 32 && /^[0-9A-Fa-f\s]+$/.test(value.replace(/\s/g, ''));
+                  
+                  return (
+                    <td
+                      key={`${index}-${header}`}
+                      className="px-4 py-3 text-sm text-foreground"
+                      style={isHex ? { maxWidth: '200px' } : {}}
+                    >
+                      {isHex ? (
+                        <div className="font-mono text-xs break-all leading-relaxed">
+                          {value.replace(/\s/g, '').match(/.{1,16}/g)?.join(' ') || value}
+                        </div>
+                      ) : (
+                        <span className="whitespace-nowrap">{value}</span>
+                      )}
+                    </td>
+                  );
+                })}
               </tr>
             ))}
           </tbody>
