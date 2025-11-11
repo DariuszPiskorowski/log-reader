@@ -33,8 +33,8 @@ export function parseCSV(content: string): ParsedData {
     return { metadata, headers: [], rows: [], totalRows: 0, filteredRows: 0, errors };
   }
   
-  // Parse header
-  const allHeaders = parseCSVLine(headerLine);
+  // Parse header - remove quotes from column names
+  const allHeaders = parseCSVLine(headerLine).map(h => h.replace(/^"|"$/g, '').trim());
   
   // Create column index map
   const columnMap: Record<string, number> = {};
