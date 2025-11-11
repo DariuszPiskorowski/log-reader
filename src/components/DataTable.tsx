@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowUpDown, ArrowUp, ArrowDown, RotateCcw } from 'lucide-react';
@@ -19,9 +19,59 @@ const NUMERIC_COLUMNS = ['Number', 'LowerLimit', 'Value', 'UpperLimit'];
 
 export const DataTable = ({ headers, rows, totalRows }: DataTableProps) => {
   const [sortConfigs, setSortConfigs] = useState<SortConfig[]>([]);
+  const tableScrollRef = useRef<HTMLDivElement>(null);
+  const stickyScrollRef = useRef<HTMLDivElement>(null);
+  const stickyScrollContentRef = useRef<HTMLDivElement>(null);
   
   console.log('DataTable received headers:', headers);
   console.log('DataTable received rows (first row):', rows[0]);
+
+  // Synchronize scroll between table and sticky scrollbar
+  useEffect(() => {
+    const tableScroll = tableScrollRef.current;
+    const stickyScroll = stickyScrollRef.current;
+    
+    if (!tableScroll || !stickyScroll) return;
+
+    const handleTableScroll = () => {
+      if (stickyScroll) {
+        stickyScroll.scrollLeft = tableScroll.scrollLeft;
+      }
+    };
+
+    const handleStickyScroll = () => {
+      if (tableScroll) {
+        tableScroll.scrollLeft = stickyScroll.scrollLeft;
+      }
+    };
+
+    // Update sticky scrollbar width to match table
+    const updateStickyWidth = () => {
+      if (tableScroll && stickyScrollContentRef.current) {
+        stickyScrollContentRef.current.style.width = `${tableScroll.scrollWidth}px`;
+      }
+    };
+
+    tableScroll.addEventListener('scroll', handleTableScroll);
+    stickyScroll.addEventListener('scroll', handleStickyScroll);
+    
+    // Initial width update
+    updateStickyWidth();
+    
+    // Update on window resize
+    window.addEventListener('resize', updateStickyWidth);
+    
+    // Use ResizeObserver to update when table content changes
+    const resizeObserver = new ResizeObserver(updateStickyWidth);
+    resizeObserver.observe(tableScroll);
+
+    return () => {
+      tableScroll.removeEventListener('scroll', handleTableScroll);
+      stickyScroll.removeEventListener('scroll', handleStickyScroll);
+      window.removeEventListener('resize', updateStickyWidth);
+      resizeObserver.disconnect();
+    };
+  }, []);
 
   const sortedRows = useMemo(() => {
     if (sortConfigs.length === 0) return rows;
@@ -115,7 +165,7 @@ export const DataTable = ({ headers, rows, totalRows }: DataTableProps) => {
         </Button>
       </div>
 
-      <div className="overflow-x-auto border rounded-lg border-table-border">
+      <div ref={tableScrollRef} className="overflow-x-auto border rounded-lg border-table-border">
         <table className="w-full">
           <thead className="bg-table-header sticky top-0 z-10">
             <tr>
@@ -168,6 +218,14 @@ export const DataTable = ({ headers, rows, totalRows }: DataTableProps) => {
         </table>
       </div>
 
+      {/* Sticky horizontal scrollbar */}
+      <div 
+        ref={stickyScrollRef}
+        className="fixed bottom-0 left-0 right-0 overflow-x-auto bg-background/95 backdrop-blur-sm border-t border-border z-50 h-4"
+        style={{ scrollbarGutter: 'stable' }}
+      >
+        <div ref={stickyScrollContentRef} className="h-1" />
+      </div>
     </Card>
   );
 };
