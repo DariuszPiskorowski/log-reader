@@ -36,10 +36,18 @@ export function parseCSV(content: string): ParsedData {
   // Parse header - remove quotes from column names
   const allHeaders = parseCSVLine(headerLine).map(h => h.replace(/^"|"$/g, '').trim());
   
+  console.log('All headers found:', allHeaders);
+  console.log('Required columns:', REQUIRED_COLUMNS);
+  
   // Create column index map
   const columnMap: Record<string, number> = {};
   allHeaders.forEach((header, index) => {
     columnMap[header] = index;
+  });
+  
+  console.log('Column map:', columnMap);
+  REQUIRED_COLUMNS.forEach(col => {
+    console.log(`Column "${col}" at index:`, columnMap[col]);
   });
   
   // Validate required columns exist
