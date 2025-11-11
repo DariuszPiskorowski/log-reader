@@ -1,8 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { ArrowUpDown, ArrowUp, ArrowDown, X, RotateCcw } from 'lucide-react';
+import { ArrowUpDown, ArrowUp, ArrowDown, RotateCcw } from 'lucide-react';
 import { naturalSort } from '@/utils/csvParser';
 
 interface DataTableProps {
@@ -19,27 +18,15 @@ interface SortConfig {
 const NUMERIC_COLUMNS = ['Number', 'LowerLimit', 'Value', 'UpperLimit'];
 
 export const DataTable = ({ headers, rows, totalRows }: DataTableProps) => {
-  const [filters, setFilters] = useState<Record<string, string>>({});
   const [sortConfigs, setSortConfigs] = useState<SortConfig[]>([]);
   
   console.log('DataTable received headers:', headers);
   console.log('DataTable received rows (first row):', rows[0]);
 
-  const filteredRows = useMemo(() => {
-    return rows.filter(row => {
-      return Object.entries(filters).every(([column, filterValue]) => {
-        if (!filterValue) return true;
-        const cellValue = row[column]?.toLowerCase() || '';
-        const filter = filterValue.toLowerCase();
-        return cellValue.includes(filter);
-      });
-    });
-  }, [rows, filters]);
-
   const sortedRows = useMemo(() => {
-    if (sortConfigs.length === 0) return filteredRows;
+    if (sortConfigs.length === 0) return rows;
 
-    return [...filteredRows].sort((a, b) => {
+    return [...rows].sort((a, b) => {
       for (const { column, direction } of sortConfigs) {
         const aVal = a[column] || '';
         const bVal = b[column] || '';
@@ -59,7 +46,7 @@ export const DataTable = ({ headers, rows, totalRows }: DataTableProps) => {
       }
       return 0;
     });
-  }, [filteredRows, sortConfigs]);
+  }, [rows, sortConfigs]);
 
   const handleSort = useCallback((column: string, shiftKey: boolean) => {
     setSortConfigs(prev => {
@@ -87,14 +74,6 @@ export const DataTable = ({ headers, rows, totalRows }: DataTableProps) => {
         return [...prev, { column, direction: 'asc' }];
       }
     });
-  }, []);
-
-  const handleFilterChange = useCallback((column: string, value: string) => {
-    setFilters(prev => ({ ...prev, [column]: value }));
-  }, []);
-
-  const clearFilters = useCallback(() => {
-    setFilters({});
   }, []);
 
   const resetSort = useCallback(() => {
@@ -125,26 +104,15 @@ export const DataTable = ({ headers, rows, totalRows }: DataTableProps) => {
           Showing <span className="font-semibold text-foreground">{sortedRows.length}</span> of{' '}
           <span className="font-semibold text-foreground">{totalRows}</span> rows
         </div>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={clearFilters}
-            disabled={Object.values(filters).every(f => !f)}
-          >
-            <X className="w-4 h-4 mr-2" />
-            Clear Filters
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={resetSort}
-            disabled={sortConfigs.length === 0}
-          >
-            <RotateCcw className="w-4 h-4 mr-2" />
-            Reset Sort
-          </Button>
-        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={resetSort}
+          disabled={sortConfigs.length === 0}
+        >
+          <RotateCcw className="w-4 h-4 mr-2" />
+          Reset Sort
+        </Button>
       </div>
 
       <div className="overflow-x-auto border rounded-lg border-table-border">
@@ -164,18 +132,6 @@ export const DataTable = ({ headers, rows, totalRows }: DataTableProps) => {
                     <span>{header}</span>
                     {getSortIcon(header)}
                   </button>
-                </th>
-              ))}
-            </tr>
-            <tr>
-              {headers.map(header => (
-                <th key={`filter-${header}`} className="px-4 py-2 border-b border-table-border">
-                  <Input
-                    placeholder={`Filter ${header}...`}
-                    value={filters[header] || ''}
-                    onChange={(e) => handleFilterChange(header, e.target.value)}
-                    className="h-8 text-xs bg-background"
-                  />
                 </th>
               ))}
             </tr>
@@ -212,11 +168,6 @@ export const DataTable = ({ headers, rows, totalRows }: DataTableProps) => {
         </table>
       </div>
 
-      {sortedRows.length === 0 && (
-        <div className="text-center py-12 text-muted-foreground">
-          No rows match the current filters
-        </div>
-      )}
     </Card>
   );
 };
