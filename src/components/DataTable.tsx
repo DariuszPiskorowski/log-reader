@@ -194,7 +194,7 @@ export const DataTable = ({ headers, rows, totalRows }: DataTableProps) => {
                 <tr
                   key={index}
                   className={`hover:bg-table-hover transition-colors border-b border-table-border last:border-b-0 ${
-                    isFailed ? 'bg-destructive/10' : ''
+                    isFailed ? 'bg-destructive/10 text-destructive' : ''
                   }`}
                 >
                 {headers.map(header => {
