@@ -187,11 +187,15 @@ export const DataTable = ({ headers, rows, totalRows }: DataTableProps) => {
             </tr>
           </thead>
           <tbody>
-            {sortedRows.map((row, index) => (
-              <tr
-                key={index}
-                className="hover:bg-table-hover transition-colors border-b border-table-border last:border-b-0"
-              >
+            {sortedRows.map((row, index) => {
+              const isFailed = row['Result'] === 'False';
+              return (
+                <tr
+                  key={index}
+                  className={`hover:bg-table-hover transition-colors border-b border-table-border last:border-b-0 ${
+                    isFailed ? 'bg-destructive/10' : ''
+                  }`}
+                >
                 {headers.map(header => {
                   const value = row[header];
                   const isHex = value && value.length > 32 && /^[0-9A-Fa-f\s]+$/.test(value.replace(/\s/g, ''));
@@ -212,8 +216,9 @@ export const DataTable = ({ headers, rows, totalRows }: DataTableProps) => {
                     </td>
                   );
                 })}
-              </tr>
-            ))}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
