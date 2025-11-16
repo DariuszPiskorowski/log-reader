@@ -14,7 +14,6 @@ const REQUIRED_COLUMNS = [
   'Value',
   'UpperLimit',
   'Unit',
-  'CompareMode',
   'Result',
   'AlternativeText'
 ];
