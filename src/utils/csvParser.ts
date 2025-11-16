@@ -69,9 +69,9 @@ export function parseCSV(content: string): ParsedData {
     // Skip if wrong number of columns
     if (values.length !== allHeaders.length) continue;
     
-    // Filter: only include rows with non-empty StepNumber value
+    // Filter: only include rows with non-empty StepNumber value and not 0000.000
     const stepNumber = (values[columnMap['StepNumber']] || '').trim();
-    if (!stepNumber) continue; // Ignore rows without StepNumber value
+    if (!stepNumber || stepNumber === '0000.000') continue;
     
     totalRows++;
     
