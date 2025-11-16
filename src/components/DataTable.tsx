@@ -188,7 +188,8 @@ export const DataTable = ({ headers, rows, totalRows }: DataTableProps) => {
           </thead>
           <tbody>
             {sortedRows.map((row, index) => {
-              const isFailed = row['Result'] === 'False';
+              const resultVal = String(row['Result'] ?? '').trim().toLowerCase();
+              const isFailed = resultVal === 'false' || resultVal === 'failed' || resultVal === 'fail';
               return (
                 <tr
                   key={index}
