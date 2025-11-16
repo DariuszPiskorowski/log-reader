@@ -204,7 +204,7 @@ export const DataTable = ({ headers, rows, totalRows }: DataTableProps) => {
                   return (
                     <td
                       key={`${index}-${header}`}
-                      className="px-4 py-3 text-sm text-foreground"
+                      className={`px-4 py-3 text-sm ${isFailed ? 'text-destructive' : 'text-foreground'}`}
                       style={isHex ? { maxWidth: '200px' } : {}}
                     >
                       {isHex ? (
