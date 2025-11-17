@@ -1,6 +1,6 @@
 # CI/CD Pipeline Configuration
 
-name: Build Harmonizer Windows exe (Tauri)
+name: Build LogReader Windows exe (Tauri)
 
 on:
   workflow_dispatch:
