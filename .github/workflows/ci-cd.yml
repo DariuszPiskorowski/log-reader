@@ -38,14 +38,14 @@ jobs:
       - name: Init Tauri (if not present)
         run: |
           if (!(Test-Path "src-tauri/tauri.conf.json")) {
-            npx tauri init --ci --app-name Harmonizer --window-title Harmonizer --frontend-dist ../dist
+            npx tauri init --ci --app-name Logger --window-title Logger --frontend-dist ../dist
           }
         shell: pwsh
 
       - name: Fix tauri.conf.json (identifier + frontendDist)
         run: |
           $conf = Get-Content src-tauri/tauri.conf.json | Out-String | ConvertFrom-Json
-          $conf.identifier = "com.harmonizer.app"
+          $conf.identifier = "com.logger.app"
           $conf.build.frontendDist = "../dist"
           $conf | ConvertTo-Json -Depth 10 | Set-Content src-tauri/tauri.conf.json
         shell: pwsh
