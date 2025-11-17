@@ -1,3 +1,62 @@
 # CI/CD Pipeline Configuration
-# Add your workflow configuration here
 
+name: Build Harmonizer Windows exe (Tauri)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install npm dependencies
+        run: npm install
+
+      - name: Build Vite frontend
+        run: npm run build
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+
+      - name: Add x86_64 target (for Rust)
+        run: rustup target add x86_64-pc-windows-msvc
+
+      - name: Install Tauri CLI
+        run: npm install --save-dev @tauri-apps/cli
+
+      - name: Init Tauri (if not present)
+        run: |
+          if (!(Test-Path "src-tauri/tauri.conf.json")) {
+            npx tauri init --ci --app-name Harmonizer --window-title Harmonizer --frontend-dist ../dist
+          }
+        shell: pwsh
+
+      - name: Fix tauri.conf.json (identifier + frontendDist)
+        run: |
+          $conf = Get-Content src-tauri/tauri.conf.json | Out-String | ConvertFrom-Json
+          $conf.identifier = "com.harmonizer.app"
+          $conf.build.frontendDist = "../dist"
+          $conf | ConvertTo-Json -Depth 10 | Set-Content src-tauri/tauri.conf.json
+        shell: pwsh
+
+      # (Opcjonalnie) dodaj ikony, jeśli masz je w repo
+
+      - name: Build Windows x86_64 exe
+        run: npx tauri build --target x86_64-pc-windows-msvc
+
+      - name: Upload exe artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: harmonizer-exe
+          path: src-tauri/target/x86_64-pc-windows-msvc/release/*.exe
