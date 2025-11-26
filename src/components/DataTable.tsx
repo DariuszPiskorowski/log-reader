@@ -166,7 +166,7 @@ export const DataTable = ({ headers, rows, totalRows }: DataTableProps) => {
       </div>
 
       <div ref={tableScrollRef} className="overflow-x-auto border rounded-lg border-table-border">
-        <table className="w-full">
+        <table className="w-[120%]">
           <thead className="bg-table-header sticky top-0 z-10">
             <tr>
               {headers.map(header => (
