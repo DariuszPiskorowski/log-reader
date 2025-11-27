@@ -166,20 +166,40 @@ export const DataTable = ({ headers, rows, totalRows }: DataTableProps) => {
       </div>
 
       <div ref={tableScrollRef} className="overflow-x-auto border rounded-lg border-table-border">
-        <table className="w-[120%]">
+        <table className="w-full table-fixed">
+          <colgroup>
+            {headers.map(header => {
+              // Define column widths based on expected content
+              const getColumnWidth = () => {
+                switch (header) {
+                  case 'Number': return 'w-[60px]';
+                  case 'StepNumber': return 'w-[90px]';
+                  case 'LowerLimit': return 'w-[90px]';
+                  case 'Value': return 'w-[100px]';
+                  case 'UpperLimit': return 'w-[90px]';
+                  case 'Unit': return 'w-[60px]';
+                  case 'CompareMode': return 'w-[100px]';
+                  case 'Result': return 'w-[70px]';
+                  case 'AlternativeText': return 'w-auto';
+                  default: return 'w-auto';
+                }
+              };
+              return <col key={header} className={getColumnWidth()} />;
+            })}
+          </colgroup>
           <thead className="bg-table-header sticky top-0 z-10">
             <tr>
               {headers.map(header => (
                 <th
                   key={header}
-                  className="px-4 py-3 text-left text-sm font-semibold text-foreground border-b border-table-border"
+                  className="px-3 py-3 text-left text-sm font-semibold text-foreground border-b border-table-border"
                 >
                   <button
                     onClick={(e) => handleSort(header, e.shiftKey)}
-                    className="flex items-center gap-2 hover:text-primary transition-colors w-full"
+                    className="flex items-center gap-1 hover:text-primary transition-colors w-full"
                     title="Click to sort, Shift+Click for multi-column sort"
                   >
-                    <span>{header}</span>
+                    <span className="truncate">{header}</span>
                     {getSortIcon(header)}
                   </button>
                 </th>
@@ -200,17 +220,20 @@ export const DataTable = ({ headers, rows, totalRows }: DataTableProps) => {
                 {headers.map(header => {
                   const value = row[header];
                   const isHex = value && value.length > 32 && /^[0-9A-Fa-f\s]+$/.test(value.replace(/\s/g, ''));
+                  const isAlternativeText = header === 'AlternativeText';
                   
                   return (
                     <td
                       key={`${index}-${header}`}
-                      className={`px-4 py-3 text-sm ${isFailed ? 'text-destructive' : 'text-foreground'}`}
-                      style={isHex ? { maxWidth: '200px' } : {}}
+                      className={`px-3 py-3 text-sm ${isFailed ? 'text-destructive' : 'text-foreground'} ${isAlternativeText ? '' : 'truncate'}`}
+                      title={value}
                     >
                       {isHex ? (
                         <div className="font-mono text-xs break-all leading-relaxed">
                           {value.replace(/\s/g, '').match(/.{1,16}/g)?.join(' ') || value}
                         </div>
+                      ) : isAlternativeText ? (
+                        <span className="break-words">{value}</span>
                       ) : (
                         <span className="whitespace-nowrap">{value}</span>
                       )}
