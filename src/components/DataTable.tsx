@@ -196,10 +196,10 @@ export const DataTable = ({ headers, rows, totalRows }: DataTableProps) => {
                 >
                   <button
                     onClick={(e) => handleSort(header, e.shiftKey)}
-                    className="flex items-center gap-1 hover:text-primary transition-colors w-full"
+                    className="flex items-center gap-1 hover:text-primary transition-colors w-full whitespace-nowrap"
                     title="Click to sort, Shift+Click for multi-column sort"
                   >
-                    <span className="truncate">{header}</span>
+                    <span>{header}</span>
                     {getSortIcon(header)}
                   </button>
                 </th>
