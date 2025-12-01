@@ -1,13 +1,16 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowUpDown, ArrowUp, ArrowDown, RotateCcw } from 'lucide-react';
+import { ArrowUpDown, ArrowUp, ArrowDown, RotateCcw, FileDown } from 'lucide-react';
 import { naturalSort } from '@/utils/csvParser';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 interface DataTableProps {
   headers: string[];
   rows: Record<string, string>[];
   totalRows: number;
+  metadata?: string[];
 }
 
 interface SortConfig {
@@ -17,7 +20,7 @@ interface SortConfig {
 
 const NUMERIC_COLUMNS = ['Number', 'LowerLimit', 'Value', 'UpperLimit'];
 
-export const DataTable = ({ headers, rows, totalRows }: DataTableProps) => {
+export const DataTable = ({ headers, rows, totalRows, metadata = [] }: DataTableProps) => {
   const [sortConfigs, setSortConfigs] = useState<SortConfig[]>([]);
   const tableScrollRef = useRef<HTMLDivElement>(null);
   const stickyScrollRef = useRef<HTMLDivElement>(null);
@@ -147,6 +150,62 @@ export const DataTable = ({ headers, rows, totalRows }: DataTableProps) => {
     );
   };
 
+  const exportToPDF = useCallback(() => {
+    const doc = new jsPDF({
+      orientation: 'landscape',
+      unit: 'mm',
+      format: 'a4',
+    });
+
+    let yPosition = 15;
+
+    // Add metadata
+    if (metadata.length > 0) {
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.text('File Metadata:', 14, yPosition);
+      yPosition += 7;
+      
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      metadata.forEach((line) => {
+        doc.text(line, 14, yPosition);
+        yPosition += 5;
+      });
+      
+      yPosition += 5;
+    }
+
+    // Prepare table data
+    const tableData = sortedRows.map(row => 
+      headers.map(header => row[header] || '')
+    );
+
+    // Generate table
+    autoTable(doc, {
+      startY: yPosition,
+      head: [headers],
+      body: tableData,
+      styles: {
+        fontSize: 7,
+        cellPadding: 2,
+      },
+      headStyles: {
+        fillColor: [41, 128, 185],
+        textColor: 255,
+        fontStyle: 'bold',
+      },
+      alternateRowStyles: {
+        fillColor: [245, 245, 245],
+      },
+      margin: { left: 14, right: 14 },
+    });
+
+    // Save the PDF
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+    doc.save(`log-data-${timestamp}.pdf`);
+  }, [headers, sortedRows, metadata]);
+
   return (
     <Card className="p-6 bg-card">
       <div className="flex items-center justify-between mb-4 flex-wrap gap-4">
@@ -154,15 +213,25 @@ export const DataTable = ({ headers, rows, totalRows }: DataTableProps) => {
           Showing <span className="font-semibold text-foreground">{sortedRows.length}</span> of{' '}
           <span className="font-semibold text-foreground">{totalRows}</span> rows
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={resetSort}
-          disabled={sortConfigs.length === 0}
-        >
-          <RotateCcw className="w-4 h-4 mr-2" />
-          Reset Sort
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={exportToPDF}
+          >
+            <FileDown className="w-4 h-4 mr-2" />
+            Export to PDF
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={resetSort}
+            disabled={sortConfigs.length === 0}
+          >
+            <RotateCcw className="w-4 h-4 mr-2" />
+            Reset Sort
+          </Button>
+        </div>
       </div>
 
       <div ref={tableScrollRef} className="overflow-x-auto border rounded-lg border-table-border">

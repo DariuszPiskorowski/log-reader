@@ -76,6 +76,7 @@ const Index = () => {
                 headers={parsedData.headers}
                 rows={parsedData.rows}
                 totalRows={parsedData.totalRows}
+                metadata={parsedData.metadata}
               />
             ) : (
               <div className="text-center py-12 text-muted-foreground">
