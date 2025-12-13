@@ -84,13 +84,19 @@ const Index = () => {
               </div>
             )}
 
-            <div className="flex justify-center">
+            <div className="flex justify-between items-center">
+              <div className="flex-1" />
               <button
                 onClick={() => setParsedData(null)}
                 className="text-sm text-primary hover:underline"
               >
                 Upload a different file
               </button>
+              <div className="flex-1 text-right">
+                <span className="text-xs text-muted-foreground">
+                  Created by Dariusz Piskorowski
+                </span>
+              </div>
             </div>
           </div>
         )}
