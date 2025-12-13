@@ -52,7 +52,7 @@ const Index = () => {
             </h1>
           </div>
           <p className="text-muted-foreground">
-            Upload and analyze semicolon-separated log files with interactive filtering and sorting
+            Upload and analyse log files from Testman
           </p>
         </header>
 
